@@ -1,3 +1,4 @@
+
 const { usePlugin } = require('@nomiclabs/buidler/config')
 const hooks = require('./scripts/buidler-hooks')
 
@@ -10,7 +11,15 @@ module.exports = {
     localhost: {
       url: 'http://localhost:8545',
     },
+    hardhat: {
+      url: 'http://localhost:8545',
+      forking: {
+        url: `https://eth-rinkeby.alchemyapi.io/v2/<key>`,
+        blockNumber: 9596511,
+      },
+    },
   },
+
   solc: {
     version: '0.4.24',
     optimizer: {
@@ -28,7 +37,7 @@ module.exports = {
     clientServePort: 3000,
     appSrcPath: 'app/',
     appBuildOutputPath: 'dist/',
-    appName: 'streaming',
+    appName: 'Streaming',
     hooks, // Path to script hooks
   },
 }

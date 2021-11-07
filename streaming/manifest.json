@@ -1,5 +1,5 @@
 {
-  "name": "streaming",
+  "name": "Streaming",
   "author": "Placeholder-author",
   "description": "An application for Aragon",
   "details_url": "/meta/details.md",
@@ -10,7 +10,11 @@
       "sizes": "56x56"
     }
   ],
-  "screenshots": [{ "src": "/meta/screenshot-1.png" }],
+  "screenshots": [
+    {
+      "src": "/meta/screenshot-1.png"
+    }
+  ],
   "start_url": "/index.html",
   "script": "/script.js"
 }

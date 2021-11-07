@@ -13,6 +13,7 @@
     "publish:patch": "buidler publish patch"
   },
   "dependencies": {
+    "@aragon/apps-vault": "^4.0.0",
     "@aragon/os": "^4.4.0"
   },
   "devDependencies": {

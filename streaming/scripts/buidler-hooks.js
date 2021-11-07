@@ -10,35 +10,51 @@
  * Please see AragonConfigHooks, in the plugin's types for further details on these interfaces.
  * https://github.com/aragon/buidler-aragon/blob/develop/src/types.ts#L31
  */
+let appManager
+let vault
 
 module.exports = {
   // Called before a dao is deployed.
-  preDao: async ({ log }, { web3, artifacts }) => {},
+  preDao: async ({ log }, { web3, artifacts }) => { },
 
   // Called after a dao is deployed.
   postDao: async (
     { dao, _experimentalAppInstaller, log },
     { web3, artifacts }
-  ) => {},
+  ) => { 
+    await _getAccounts(web3)
+    await _deployVault()
+  },
 
   // Called after the app's proxy is created, but before it's initialized.
   preInit: async (
     { proxy, _experimentalAppInstaller, log },
     { web3, artifacts }
-  ) => {},
+  ) => { },
 
   // Called after the app's proxy is initialized.
   postInit: async (
     { proxy, _experimentalAppInstaller, log },
     { web3, artifacts }
-  ) => {},
+  ) => { },
 
   // Called when the start task needs to know the app proxy's init parameters.
   // Must return an array with the proxy's init parameters.
   getInitParams: async ({ log }, { web3, artifacts }) => {
-    return [42]
+    return [vault.address]
   },
 
   // Called after the app's proxy is updated with a new implementation.
-  postUpdate: async ({ proxy, log }, { web3, artifacts }) => {},
+  postUpdate: async ({ proxy, log }, { web3, artifacts }) => { },
+}
+
+async function _deployVault() {
+  const VaultMock = artifacts.require('VaultMock')
+
+  vault = await VaultMock.new({ from: appManager })
+  console.log(`> Vault deployed: ${vault.address}`)
+}
+
+async function _getAccounts(web3) {
+  ([appManager] = await web3.eth.getAccounts())
 }

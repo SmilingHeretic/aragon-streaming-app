@@ -1,13 +1,13 @@
 {
   "roles": [
     {
-      "name": "Increment the counter",
-      "id": "INCREMENT_ROLE",
+      "name": "Deposit tokens for streaming",
+      "id": "DEPOSIT_FOR_STREAMING_ROLE",
       "params": []
     },
     {
-      "name": "Decrement the counter",
-      "id": "DECREMENT_ROLE",
+      "name": "Update streams from the vault",
+      "id": "UPDATE_STREAMS_ROLE",
       "params": []
     }
   ],
@@ -33,5 +33,5 @@
     }
   },
   "appName": "streaming.aragonpm.eth",
-  "path": "contracts/CounterApp.sol"
+  "path": "contracts/Streaming.sol"
 }
