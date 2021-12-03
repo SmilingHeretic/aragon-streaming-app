@@ -1,35 +1,42 @@
-import React from 'react'
-import { useAragonApi } from '@aragon/api-react'
+import React, { useState } from 'react'
+// import { useAragonApi } from '@aragon/api-react'
 import {
-  Box,
   Button,
-  GU,
   Header,
-  IconMinus,
-  IconPlus,
   Main,
-  SyncIndicator,
-  Tabs,
-  Text,
-  textStyle,
+  SidePanel,
 } from '@aragon/ui'
-import styled from 'styled-components'
 
 function App() {
-  const { api, appState, path, requestPath } = useAragonApi()
-  const { isSyncing } = appState
+  // const { accountConnected } = useAragonApi();
+  // const { api, appState, path, requestPath } = useAragonApi()
+  // const { isSyncing } = appState
+  const [opened, setOpened] = useState(false);
 
-  const pathParts = path.match(/^\/tab\/([0-9]+)/)
-  const pageIndex = Array.isArray(pathParts)
-    ? parseInt(pathParts[1], 10) - 1
-    : 0
+  // const pathParts = path.match(/^\/tab\/([0-9]+)/)
+  // const pageIndex = Array.isArray(pathParts)
+  //   ? parseInt(pathParts[1], 10) - 1
+  //   : 0
 
   return (
     <Main>
-      {isSyncing && <SyncIndicator />}
       <Header
         primary="Streaming"
+
+        secondary={
+          <>
+            <Button mode="strong" label="Deposit" size={'medium'} css={'margin: 10px;'} onClick={() => setOpened(true)} />
+            <Button mode="strong" label="Send" size={'medium'} css={'margin: 10px;'} onClick={() => setOpened(true)} />
+            <Button mode="strong" label="Receive" size={'medium'} css={'margin: 10px 0 10px 10px;'} onClick={() => setOpened(true)} />
+          </>
+        }
       />
+      <SidePanel title='test'
+                 opened={opened}
+                 onClose={() => setOpened(false)}
+      >
+
+      </SidePanel>
     </Main>
   )
 }
