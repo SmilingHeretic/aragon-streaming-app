@@ -26,35 +26,7 @@ const errorHandler = err => {
 
 module.exports = {
   // Called before a dao is deployed.
-  preDao: async ({ log }, { web3, artifacts }) => {
-    if (network.name === "localhost") {
-      console.log("> Deploying Superfluid framework...")
-      await deployFramework(errorHandler, {
-        web3,
-        from: superfluidDeployer
-      });
-      console.log("> Superfluid framework deployed")
-
-      console.log("> Deploying tokens...")
-      await deployTestToken(errorHandler, [":", "DAI"], {
-        web3,
-        from: superfluidDeployer
-      });
-      await deploySuperToken(errorHandler, [":", "DAI"], {
-        web3,
-        from: superfluidDeployer
-      });
-      await deployTestToken(errorHandler, [":", "LINK"], {
-        web3,
-        from: superfluidDeployer
-      });
-      await deploySuperToken(errorHandler, [":", "LINK"], {
-        web3,
-        from: superfluidDeployer
-      });
-      console.log("> Tokens deployed")
-    }
-  },
+  preDao: async ({ log }, { web3, artifacts }) => { },
 
   // Called after a dao is deployed.
   postDao: async (
@@ -63,6 +35,9 @@ module.exports = {
   ) => {
     await _getAccounts(web3)
     await _deployVault()
+    await _deploySuperfluidFramework(web3)
+    await _deployTokens(web3)
+    console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
   },
 
   // Called after the app's proxy is created, but before it's initialized.
@@ -87,14 +62,43 @@ module.exports = {
   postUpdate: async ({ proxy, log }, { web3, artifacts }) => { },
 }
 
+async function _getAccounts(web3) {
+  ([appManager, superfluidDeployer] = await web3.eth.getAccounts())
+}
+
 async function _deployVault() {
   const VaultMock = artifacts.require('VaultMock')
 
   vault = await VaultMock.new({ from: appManager })
   console.log(`> Vault deployed: ${vault.address}`)
-  console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
 }
 
-async function _getAccounts(web3) {
-  ([appManager, superfluidDeployer] = await web3.eth.getAccounts())
+async function _deploySuperfluidFramework(web3) {
+  console.log("> Deploying Superfluid framework...")
+  await deployFramework(errorHandler, {
+    web3,
+    from: superfluidDeployer
+  });
+  console.log("> Superfluid framework deployed")
+}
+
+async function _deployTokens(web3) {
+  console.log("> Deploying tokens...")
+  await deployTestToken(errorHandler, [":", "DAI"], {
+    web3,
+    from: superfluidDeployer
+  });
+  await deploySuperToken(errorHandler, [":", "DAI"], {
+    web3,
+    from: superfluidDeployer
+  });
+  await deployTestToken(errorHandler, [":", "LINK"], {
+    web3,
+    from: superfluidDeployer
+  });
+  await deploySuperToken(errorHandler, [":", "LINK"], {
+    web3,
+    from: superfluidDeployer
+  });
+  console.log("> Tokens deployed")
 }
