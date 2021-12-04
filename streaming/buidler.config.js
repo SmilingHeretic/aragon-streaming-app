@@ -9,15 +9,8 @@ module.exports = {
   defaultNetwork: 'localhost',
   networks: {
     localhost: {
-      url: 'http://localhost:8545',
-    },
-    hardhat: {
-      url: 'http://localhost:8545',
-      forking: {
-        url: `https://eth-rinkeby.alchemyapi.io/v2/<key>`,
-        blockNumber: 9596511,
-      },
-    },
+      url: 'http://localhost:8545'
+    }
   },
 
   solc: {

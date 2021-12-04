@@ -10,18 +10,57 @@
  * Please see AragonConfigHooks, in the plugin's types for further details on these interfaces.
  * https://github.com/aragon/buidler-aragon/blob/develop/src/types.ts#L31
  */
+const deployFramework = require("@superfluid-finance/ethereum-contracts/scripts/deploy-framework");
+const deployTestToken = require("@superfluid-finance/ethereum-contracts/scripts/deploy-test-token");
+const deploySuperToken = require("@superfluid-finance/ethereum-contracts/scripts/deploy-super-token");
+const { networks } = require("../buidler.config");
+
 let appManager
+let superfluidDeployer
 let vault
+
+const errorHandler = err => {
+  if (err) throw err;
+};
+
 
 module.exports = {
   // Called before a dao is deployed.
-  preDao: async ({ log }, { web3, artifacts }) => { },
+  preDao: async ({ log }, { web3, artifacts }) => {
+    if (network.name === "localhost") {
+      console.log("> Deploying Superfluid framework...")
+      await deployFramework(errorHandler, {
+        web3,
+        from: superfluidDeployer
+      });
+      console.log("> Superfluid framework deployed")
+
+      console.log("> Deploying tokens...")
+      await deployTestToken(errorHandler, [":", "DAI"], {
+        web3,
+        from: superfluidDeployer
+      });
+      await deploySuperToken(errorHandler, [":", "DAI"], {
+        web3,
+        from: superfluidDeployer
+      });
+      await deployTestToken(errorHandler, [":", "LINK"], {
+        web3,
+        from: superfluidDeployer
+      });
+      await deploySuperToken(errorHandler, [":", "LINK"], {
+        web3,
+        from: superfluidDeployer
+      });
+      console.log("> Tokens deployed")
+    }
+  },
 
   // Called after a dao is deployed.
   postDao: async (
     { dao, _experimentalAppInstaller, log },
     { web3, artifacts }
-  ) => { 
+  ) => {
     await _getAccounts(web3)
     await _deployVault()
   },
@@ -53,8 +92,9 @@ async function _deployVault() {
 
   vault = await VaultMock.new({ from: appManager })
   console.log(`> Vault deployed: ${vault.address}`)
+  console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
 }
 
 async function _getAccounts(web3) {
-  ([appManager] = await web3.eth.getAccounts())
+  ([appManager, superfluidDeployer] = await web3.eth.getAccounts())
 }
