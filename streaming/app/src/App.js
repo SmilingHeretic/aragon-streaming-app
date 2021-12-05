@@ -1,22 +1,10 @@
-import React, { useState } from 'react'
-// import { useAragonApi } from '@aragon/api-react'
-import {
-  Button,
-  Header,
-  Main,
-  SidePanel,
-} from '@aragon/ui'
+import React from 'react'
+import { Header, Main, SidePanel } from '@aragon/ui'
+import SendButton from "./components/Buttons/SendButton";
+import ManageTokensButton from "./components/Buttons/ManageTokensButton";
+import ReceiveButton from "./components/Buttons/ReceiveButton";
 
 function App() {
-  // const { accountConnected } = useAragonApi();
-  // const { api, appState, path, requestPath } = useAragonApi()
-  // const { isSyncing } = appState
-  const [opened, setOpened] = useState(false);
-
-  // const pathParts = path.match(/^\/tab\/([0-9]+)/)
-  // const pageIndex = Array.isArray(pathParts)
-  //   ? parseInt(pathParts[1], 10) - 1
-  //   : 0
 
   return (
     <Main>
@@ -25,9 +13,9 @@ function App() {
 
         secondary={
           <>
-            <Button mode="strong" label="Deposit" size={'medium'} css={'margin: 10px;'} onClick={() => setOpened(true)} />
-            <Button mode="strong" label="Send" size={'medium'} css={'margin: 10px;'} onClick={() => setOpened(true)} />
-            <Button mode="strong" label="Receive" size={'medium'} css={'margin: 10px 0 10px 10px;'} onClick={() => setOpened(true)} />
+            <ManageTokensButton label="Manage Tokens" onClick={requests.manageTokens} />
+            <SendButton label="Send" onClick={requests.createStream} />
+            <ReceiveButton label="Receive" onClick={requests.receiveStream} />
           </>
         }
       />

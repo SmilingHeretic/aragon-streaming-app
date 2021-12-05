@@ -1,5 +1,5 @@
 export const MODE = {
-  SWAP_TOKEN: 'swap',
+  MANAGE_TOKENS: 'swap',
   CREATE_STREAM: 'create',
-  ACCEPT_STREAM: 'accept',
+  RECEIVE_STREAM: 'accept',
 }
