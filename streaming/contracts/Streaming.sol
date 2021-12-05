@@ -10,10 +10,6 @@ import "@aragon/apps-vault/contracts/Vault.sol";
 
 import {ISuperfluid, IConstantFlowAgreementV1, ISuperToken} from "./SuperfluidInterfaces.sol";
 
-// import {ISuperfluid, ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-
-// import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
-
 contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     using SafeMath for uint256;
 

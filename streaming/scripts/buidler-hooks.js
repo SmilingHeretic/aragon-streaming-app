@@ -21,6 +21,7 @@ let superfluidDeployer
 let vault
 let superfluid
 
+const tokens = ['DAI', "LINK"]
 const errorHandler = err => {
   if (err) throw err;
 };
@@ -92,21 +93,15 @@ async function _deploySuperfluidFramework(web3) {
 
 async function _deployTokens(web3) {
   console.log("> Deploying tokens...")
-  await deployTestToken(errorHandler, [":", "DAI"], {
-    web3,
-    from: superfluidDeployer
-  });
-  await deploySuperToken(errorHandler, [":", "DAI"], {
-    web3,
-    from: superfluidDeployer
-  });
-  await deployTestToken(errorHandler, [":", "LINK"], {
-    web3,
-    from: superfluidDeployer
-  });
-  await deploySuperToken(errorHandler, [":", "LINK"], {
-    web3,
-    from: superfluidDeployer
-  });
+  tokens.forEach(async token => {
+    await deployTestToken(errorHandler, [":", token], {
+      web3,
+      from: superfluidDeployer
+    });
+    await deploySuperToken(errorHandler, [":", token], {
+      web3,
+      from: superfluidDeployer
+    });
+  })
   console.log("> Tokens deployed")
 }
