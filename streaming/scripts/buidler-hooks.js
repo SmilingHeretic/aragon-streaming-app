@@ -13,11 +13,13 @@
 const deployFramework = require("@superfluid-finance/ethereum-contracts/scripts/deploy-framework");
 const deployTestToken = require("@superfluid-finance/ethereum-contracts/scripts/deploy-test-token");
 const deploySuperToken = require("@superfluid-finance/ethereum-contracts/scripts/deploy-super-token");
+const SuperfluidSDK = require("@superfluid-finance/js-sdk");
 const { networks } = require("../buidler.config");
 
 let appManager
 let superfluidDeployer
 let vault
+let superfluid
 
 const errorHandler = err => {
   if (err) throw err;
@@ -55,7 +57,7 @@ module.exports = {
   // Called when the start task needs to know the app proxy's init parameters.
   // Must return an array with the proxy's init parameters.
   getInitParams: async ({ log }, { web3, artifacts }) => {
-    return [vault.address]
+    return [vault.address, superfluid.host.address, superfluid.agreements.cfa.address]
   },
 
   // Called after the app's proxy is updated with a new implementation.
@@ -79,6 +81,12 @@ async function _deploySuperfluidFramework(web3) {
     web3,
     from: superfluidDeployer
   });
+
+  superfluid = new SuperfluidSDK.Framework({
+    web3,
+    version: "test",
+  });
+  await superfluid.initialize()
   console.log("> Superfluid framework deployed")
 }
 

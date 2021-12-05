@@ -15,7 +15,8 @@
   "dependencies": {
     "@aragon/apps-vault": "^4.0.0",
     "@aragon/os": "^4.4.0",
-    "@superfluid-finance/ethereum-contracts": "^1.0.0-dev.640e6ae.0"
+    "@superfluid-finance/ethereum-contracts": "^1.0.0-rc.7",
+    "@openzeppelin/contracts": "^3.2.0"
   },
   "devDependencies": {
     "@aragon/buidler-aragon": "^0.2.0",
