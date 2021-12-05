@@ -7,7 +7,7 @@
     },
     {
       "name": "Update streams from the vault",
-      "id": "UPDATE_STREAMS_ROLE",
+      "id": "UPDATE_STREAM_ROLE",
       "params": []
     }
   ],
