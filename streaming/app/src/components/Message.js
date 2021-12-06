@@ -2,7 +2,7 @@ import React from 'react'
 import { Info, IconCross, useTheme, textStyle } from '@aragon/ui'
 
 export const InfoMessage = ({ title, text }) => (
-  <div style={{ marginBottom: '1rem' }}>
+  <div css={'margin: 1rem 0;'}>
     <Info title={title}>{text}</Info>
   </div>
 )

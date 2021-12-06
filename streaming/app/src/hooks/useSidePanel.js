@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
 // Handles the state of a panel.
-export default function usePanelState() {
+export function useSidePanel() {
   const [visible, setVisible] = useState(false)
 
   const requestOpen = useCallback(() => {
