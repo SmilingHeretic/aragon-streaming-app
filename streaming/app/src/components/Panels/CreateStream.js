@@ -1,4 +1,4 @@
-// import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 // import { Field, TextInput, Button } from '@aragon/ui'
 //
 // import { isAddress } from '../../lib/web3-utils'
@@ -8,7 +8,7 @@
 // const TOKEN_ADDRESS_NOT_VALID = Symbol('TOKEN_ADDRESS_NOT_VALID')
 // const initialState = { value: '', error: NO_ERROR }
 //
-// const CreateStream = React.memo(({ tokens, onAddToken, panelVisible, panelOpened }) => {
+const CreateStream = React.memo(({ tokens, onAddToken, panelVisible, panelOpened }) => {
 //   const [address, setAddress, setError] = useAddress(panelVisible)
 //   //
 //   // const inputRef = useRef(null)
@@ -96,6 +96,6 @@
 //   if (!isAddress(address)) return TOKEN_ADDRESS_NOT_VALID
 //
 //   return null
-// }
-//
-// export default CreateStream
+})
+
+export default CreateStream

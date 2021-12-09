@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Field, TextInput, Button } from '@aragon/ui'
+import { Field, TextInput, Button, DropDown } from '@aragon/ui'
 import { ErrorMessage, InfoMessage } from "../Message";
 
 const NO_ERROR = Symbol('NO_ERROR')
 const TOKEN_ADDRESS_NOT_VALID = Symbol('TOKEN_ADDRESS_NOT_VALID')
 const initialState = { value: '', error: NO_ERROR }
 
-const DepositTokens = React.memo(({ panelVisible, panelOpened }) => {
+const DepositTokens = React.memo(({ currencies, onManageToken, panelVisible, panelOpened }) => {
+  currencies = ['DAI', 'ETH']
   const [address, setAddress, setError] = useAddress(panelVisible)
+  const [selected, setSelected] = useState(0)
 
   const inputRef = useRef(null)
   // Panel opens =>  Focus input
@@ -26,7 +28,7 @@ const DepositTokens = React.memo(({ panelVisible, panelOpened }) => {
       return
     }
 
-    onAddToken(address.value)
+    onManageToken(address.value)
   }
 
   let errorMessage
@@ -34,8 +36,19 @@ const DepositTokens = React.memo(({ panelVisible, panelOpened }) => {
 
   return (
     <div>
-      <form onSubmit={handleFormSubmit}>
-
+      <form onSubmit={handleFormSubmit} css={'margin-top: 10px;'}>
+        <Field>
+          <InfoMessage
+            text={'Use this action to deposit to your streaming budget'}
+          />
+        </Field>
+        <Field label="Select currency">
+          <DropDown
+            items={currencies}
+            selected={selected}
+            onChange={setSelected}
+          />
+        </Field>
         <Field label="Wallet address">
           <TextInput
             name="address"
@@ -46,23 +59,11 @@ const DepositTokens = React.memo(({ panelVisible, panelOpened }) => {
             required
           />
         </Field>
-        <Field label="Budget in Eth">
-          <TextInput
-            name="amount"
-            wide
-            onChange={setAddress}
-            value={address.value}
-            ref={inputRef}
-            required
-          />
-        </Field>
+
         <Button mode="strong" wide type="submit">
           Deposit
         </Button>
-        <InfoMessage
-          title="Token Management"
-          text={'Use this action to manage your streaming budget'}
-        />
+
         {errorMessage && <ErrorMessage text={errorMessage} />}
       </form>
     </div>

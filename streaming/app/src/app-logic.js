@@ -3,12 +3,14 @@ import { AragonApi, useAppState } from '@aragon/api-react'
 
 import appStateReducer from './app-state-reducer'
 import { useSidePanel } from './hooks/useSidePanel'
-import { useRequestActions } from "./hooks/useRequestAction";
 import { useRequestMode } from "./hooks/useRequestMode";
-import { useReceiveStream } from "./hooks/streaming/useReceiveStream";
-import { useCreateStream } from "./hooks/streaming/useCreateStream";
 import { useManageTokens } from "./hooks/streaming/useManageTokens";
+import { useDepositTokens } from "./hooks/streaming/useDepositTokens";
+import { useWithdrawTokens } from "./hooks/streaming/useWithdrawTokens";
+import { useCreateStream } from "./hooks/streaming/useCreateStream";
+import { useReceiveStream } from "./hooks/streaming/useReceiveStream";
 import { useUpdateStream } from "./hooks/streaming/useUpdateStream";
+import { useRequestActions } from "./hooks/useRequestAction";
 
 export function useAppLogic() {
   const { ready, isSyncing, streams = [] } = useAppState()
@@ -18,6 +20,8 @@ export function useAppLogic() {
 
   const actions = {
     manageTokens: useManageTokens(panelState.requestClose),
+    depositTokens: useDepositTokens(panelState.requestClose),
+    withdrawTokens: useWithdrawTokens(panelState.requestClose),
     createStream: useCreateStream(panelState.requestClose),
     receiveStream: useReceiveStream(panelState.requestClose),
     updateStream: useUpdateStream(panelState.requestClose),

@@ -1,18 +1,25 @@
-import React from 'react'
-import { Header, Main, SidePanel, SyncIndicator } from '@aragon/ui'
+import React from 'react';
+import { Header, Main, SidePanel, SyncIndicator } from '@aragon/ui';
+import DepositButton from "./components/Buttons/DepositButton";
+import WithdrawButton from "./components/Buttons/WithdrawButton";
 import SendButton from "./components/Buttons/SendButton";
-import ManageTokensButton from "./components/Buttons/ManageTokensButton";
 import ReceiveButton from "./components/Buttons/ReceiveButton";
 import { AppLogicProvider, useAppLogic } from './app-logic'
 import { MODE } from "./utils/mode-types";
 import DepositTokens from "./components/Panels/DepositTokens";
+import WithdrawTokens from "./components/Panels/WithdrawTokens";
+import CreateStream from "./components/Panels/CreateStream";
+
+
 
 const App = React.memo( () => {
   const { actions, requests, isSyncing, streams, panelState, mode } = useAppLogic()
 
-  const title = mode === MODE.MANAGE_TOKENS
-    ? 'Manage Tokens'
-    : mode === MODE.CREATE_STREAM
+  const title = mode === MODE.DEPOSIT_TOKENS
+    ? 'Deposit Tokens'
+    : mode === MODE.WITHDRAW_TOKENS
+      ? 'Withdraw Tokens'
+      : mode === MODE.CREATE_STREAM
       ? 'Send Tokens'
       : 'Receive Tokens'
 
@@ -24,7 +31,8 @@ const App = React.memo( () => {
 
         secondary={
           <>
-            <ManageTokensButton label="Manage Tokens" onClick={requests.manageTokens} />
+            <DepositButton label="Deposit" onClick={requests.depositTokens} />
+            <WithdrawButton label="Withdraw" onClick={requests.withdrawTokens} />
             <SendButton label="Send" onClick={requests.createStream} />
             <ReceiveButton label="Receive" onClick={requests.receiveStream} />
           </>
@@ -34,17 +42,18 @@ const App = React.memo( () => {
                  opened={panelState.visible}
                  onClose={panelState.requestClose}
       >
-        {mode === MODE.MANAGE_TOKENS ? (
+        {mode === MODE.DEPOSIT_TOKENS ? (
           <DepositTokens
             panelVisible={panelState.visible}
             panelOpened={panelState.opened}
           />
-        ) : mode === MODE.CREATE_STREAM ? (
-          <DepositTokens
+        ) : mode === MODE.WITHDRAW_TOKENS ? (
+          <WithdrawTokens
             panelVisible={panelState.visible}
             panelOpened={panelState.opened}
           />
-        ) : (           <DepositTokens
+        ) : (
+          <CreateStream
             panelVisible={panelState.visible}
             panelOpened={panelState.opened}
           />
