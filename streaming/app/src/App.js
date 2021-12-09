@@ -9,6 +9,7 @@ import { MODE } from "./utils/mode-types";
 import DepositTokens from "./components/Panels/DepositTokens";
 import WithdrawTokens from "./components/Panels/WithdrawTokens";
 import CreateStream from "./components/Panels/CreateStream";
+import ReceiveStream from "./components/Panels/ReceiveStream";
 
 
 
@@ -21,7 +22,7 @@ const App = React.memo( () => {
       ? 'Withdraw Tokens'
       : mode === MODE.CREATE_STREAM
       ? 'Send Tokens'
-      : 'Receive Tokens'
+      : 'Deposit to DAO wallet'
 
   return (
     <Main>
@@ -52,8 +53,13 @@ const App = React.memo( () => {
             panelVisible={panelState.visible}
             panelOpened={panelState.opened}
           />
-        ) : (
+        ) : mode === MODE.CREATE_STREAM ? (
           <CreateStream
+            panelVisible={panelState.visible}
+            panelOpened={panelState.opened}
+          />
+        ) : (
+          <ReceiveStream
             panelVisible={panelState.visible}
             panelOpened={panelState.opened}
           />
