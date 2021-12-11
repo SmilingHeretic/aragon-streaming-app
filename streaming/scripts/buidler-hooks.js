@@ -16,16 +16,19 @@ const deploySuperToken = require("@superfluid-finance/ethereum-contracts/scripts
 const SuperfluidSDK = require("@superfluid-finance/js-sdk");
 const { networks } = require("../buidler.config");
 
-let appManager
-let superfluidDeployer
-let vault
-let superfluid
-
 const tokens = ['ETH', "DAI"]
 const errorHandler = err => {
   if (err) throw err;
 };
 
+// ganache addresses
+let appManager
+let superfluidDeployer
+let alice, bob
+
+let vault
+let superfluid
+let tokenToContract = {}
 
 module.exports = {
   // Called before a dao is deployed.
@@ -40,6 +43,8 @@ module.exports = {
     await _deployVault()
     await _deploySuperfluidFramework(web3)
     await _deployTokens(web3)
+    await _initializeSuperfluidFramework(web3)
+    await _getTokenAddresses(web3)
     console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
   },
 
@@ -66,7 +71,7 @@ module.exports = {
 }
 
 async function _getAccounts(web3) {
-  ([appManager, superfluidDeployer] = await web3.eth.getAccounts())
+  ([appManager, superfluidDeployer, alice, bob] = await web3.eth.getAccounts())
 }
 
 async function _deployVault() {
@@ -80,20 +85,22 @@ async function _deploySuperfluidFramework(web3) {
   console.log("> Deploying Superfluid framework...")
   await deployFramework(errorHandler, {
     web3,
-    from: superfluidDeployer
+    from: superfluidDeployer,
   });
+}
 
+async function _initializeSuperfluidFramework(web3) {
   superfluid = new SuperfluidSDK.Framework({
     web3,
     version: "test",
+    tokens: tokens
   });
   await superfluid.initialize()
-  console.log("> Superfluid framework deployed")
 }
 
 async function _deployTokens(web3) {
   console.log("> Deploying tokens...")
-  tokens.forEach(async token => {
+  for (const token of tokens) {
     await deployTestToken(errorHandler, [":", token], {
       web3,
       from: superfluidDeployer
@@ -102,6 +109,18 @@ async function _deployTokens(web3) {
       web3,
       from: superfluidDeployer
     });
-  })
+  }
   console.log("> Tokens deployed")
+}
+
+async function _getTokenAddresses(web3) {
+  tokens.forEach(async token => {
+    const superToken = `${token}x`
+    tokenToContract[superToken] = superfluid.tokens[superToken];
+    tokenToContract[token] = await superfluid.contracts.TestToken.at(await superfluid.tokens[token].address);
+  })
+}
+
+async function _printState(web3) {
+
 }
