@@ -21,7 +21,7 @@ let superfluidDeployer
 let vault
 let superfluid
 
-const tokens = ['DAI', "LINK"]
+const tokens = ['ETH', "DAI"]
 const errorHandler = err => {
   if (err) throw err;
 };

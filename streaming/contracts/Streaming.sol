@@ -15,16 +15,21 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
 
-    bytes32 public constant DEPOSIT_FOR_STREAMING_ROLE =
-        keccak256("DEPOSIT_FOR_STREAMING_ROLE");
+    bytes32 public constant DEPOSIT_ROLE = keccak256("DEPOSIT_ROLE");
+    bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
+    bytes32 public constant WHITELIST_SUPER_TOKEN_ROLE =
+        keccak256("WHITELIST_SUPER_TOKEN_ROLE");
     bytes32 public constant UPDATE_STREAM_ROLE =
         keccak256("UPDATE_STREAM_ROLE");
 
     string private constant ERROR_VAULT_NOT_CONTRACT = "VAULT_NOT_CONTRACT";
+    string private constant ERROR_TOKEN_APPROVE_FAILED =
+        "STREAMING_TOKEN_APPROVE_FAILED";
 
     Vault public vault;
     ISuperfluid host;
     IConstantFlowAgreementV1 cfa;
+    mapping(address => bool) superTokenWhitelist;
 
     function initialize(
         Vault _vault,
@@ -40,23 +45,66 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     }
 
     // function for token -> superToken conversion
+    function deposit(ISuperToken superToken, uint256 amount)
+        external
+        isWhitelisted(superToken)
+        authP(DEPOSIT_ROLE, arr(uint256(superToken), amount))
+    {
+        // get the underlying token address from the SuperToken contract
+        address underlyingToken = superToken.getUnderlyingToken();
+        // transfer tokens from vault to the streaming app smart contract
+        // we have to ensure that the streaming app has the role to call vault.transfer
+        vault.transfer(underlyingToken, address(this), amount);
+        // call approve for these tokens for the super token contract
+        require(
+            ERC20(underlyingToken).safeApprove(superToken, amount),
+            ERROR_TOKEN_APPROVE_FAILED
+        );
+        // call upgrade of the super token contract
+        superToken.upgrade(amount);
+    }
+
     // function superTokens -> Tokens
+    function withdraw(ISuperToken superToken, uint256 amount)
+        external
+        isWhitelisted(superToken)
+        authP(WITHDRAW_ROLE, arr(uint256(superToken), amount))
+    {
+        // get the underlying token address from the SuperToken contract
+        address underlyingToken = superToken.getUnderlyingToken();
+        // downgrade from Super Tokens to ERC20
+        superToken.downgrade(amount);
+        // Approve the tokens for the Vault (it does the actual transferring)
+        require(
+            ERC20(underlyingToken).safeApprove(vault, amount),
+            ERROR_TOKEN_APPROVE_FAILED
+        );
+        // send the downgraded tokens back to the vault
+        vault.deposit(underlyingToken, amount);
+    }
 
     // function for updating a stream, triggered on "send" from UI
-    // let's copy from StreamingCollateral the logic for handling cases
     function updateStream(
         ISuperToken superToken,
         address receiver,
         int96 newFlowRate
     )
         external
+        isWhitelisted(superToken)
         authP(
             UPDATE_STREAM_ROLE,
             arr(uint256(superToken), uint256(receiver), uint256(newFlowRate))
         )
     {
-        // we need some whitelist for superTokens. Passing here an arbitrary address could be very bad. Maybe we can
+        // we need some whitelist for superTokens. Passing here an arbitrary address could be very bad.
         _updateOutflow(superToken, receiver, newFlowRate);
+    }
+
+    function whitelistSuperToken(ISuperToken superToken)
+        external
+        authP(WHITELIST_SUPER_TOKEN_ROLE, arr(uint256(superToken)))
+    {
+        superTokenWhitelist[superToken] = true;
     }
 
     // helpers for updating outflows
@@ -121,5 +169,11 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         returns (int96 flowRate)
     {
         (, flowRate, , ) = cfa.getFlow(superToken, address(this), receiver);
+    }
+
+    // is superToken whitelisted modifier. We cannot allow to pass arbitrary addresses to our external functions
+    modifier isWhitelisted(ISuperToken superToken) {
+        require(superTokenWhitelist[superToken]);
+        _;
     }
 }

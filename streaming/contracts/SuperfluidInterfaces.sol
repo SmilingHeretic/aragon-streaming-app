@@ -57,4 +57,10 @@ interface IConstantFlowAgreementV1 {
         );
 }
 
-interface ISuperToken {}
+interface ISuperToken {
+    function upgrade(uint256 amount) external;
+
+    function getUnderlyingToken() external view returns (address tokenAddr);
+
+    function downgrade(uint256 amount) external;
+}
