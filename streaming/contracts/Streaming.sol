@@ -31,6 +31,15 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     IConstantFlowAgreementV1 cfa;
     mapping(address => bool) superTokenWhitelist;
 
+    event StreamUpdate(
+        ISuperToken superToken,
+        address receiver,
+        int96 newFlowRate
+    );
+    event Deposit(ISuperToken superToken, uint256 amount);
+    event Withdrawal(ISuperToken superToken, uint256 amount);
+    event SuperTokenWhitlelisted(ISuperToken superToken);
+
     function initialize(
         Vault _vault,
         ISuperfluid _host,
@@ -66,6 +75,8 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         );
         // call upgrade of the super token contract
         superToken.upgrade(amount);
+
+        emit Deposit(superToken, amount);
     }
 
     // function superTokens -> Tokens
@@ -85,6 +96,8 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         );
         // send the downgraded tokens back to the vault
         vault.deposit(underlyingToken, amount);
+
+        emit Withdrawal(superToken, amount);
     }
 
     // function for updating a stream, triggered on "send" from UI
@@ -102,6 +115,7 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     {
         // we need some whitelist for superTokens. Passing here an arbitrary address could be very bad.
         _updateOutflow(superToken, receiver, newFlowRate);
+        emit StreamUpdate(superToken, receiver, newFlowRate);
     }
 
     function whitelistSuperToken(ISuperToken superToken)
@@ -109,6 +123,7 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         authP(WHITELIST_SUPER_TOKEN_ROLE, arr(uint256(superToken)))
     {
         superTokenWhitelist[superToken] = true;
+        emit SuperTokenWhitlelisted(superToken);
     }
 
     // helpers for updating outflows
