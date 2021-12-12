@@ -42,6 +42,13 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     event Withdrawal(ISuperToken superToken, uint256 amount);
     event SuperTokenWhitlelisted(ISuperToken superToken);
 
+    /**
+     * @notice Initialize Streaming app for Vault at `_vault` with Superfluid contracts addresses: host: `_host`, constant flow agreement: `_cfa`. Whitelist super tokens with following addresses: `_superTokenWhitelist`
+     * @param _vault Address of the vault Streaming will rely on (non changeable)
+     * @param _host Host smart contract of Superfluid
+     * @param _cfa Constant Flow Agreement smart contract address from Superfluid
+     * @param _superTokenWhitelist List of addresses of Super Tokens for streaming to whitelist
+     */
     function initialize(
         Vault _vault,
         ISuperfluid _host,
@@ -59,7 +66,11 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         }
     }
 
-    // function for token -> superToken conversion
+    /**
+     * @notice Deposit `@tokenAmount(superToken, amount)` from vault (where it's still a normal, not super, token) to streaming app and convert it to super token.
+     * @param superToken Address of super token to deposit for streaming
+     * @param amount Amount of token to deposit for streaming
+     */
     function deposit(ISuperToken superToken, uint256 amount)
         external
         isWhitelisted(superToken)
@@ -84,7 +95,11 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         emit Deposit(superToken, amount);
     }
 
-    // function superTokens -> Tokens
+    /**
+     * @notice Withdraw `@tokenAmount(superToken, amount)` from streaming app to the vault and convert it back from super token to a normal token.
+     * @param superToken Address of super token to withdraw
+     * @param amount Amount of token to withdraw
+     */
     function withdraw(ISuperToken superToken, uint256 amount)
         external
         isWhitelisted(superToken)
@@ -105,7 +120,12 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         emit Withdrawal(superToken, amount);
     }
 
-    // function for updating a stream, triggered on "send" from UI
+    /**
+     * @notice Update (or close, or create) stream of `@tokenAmount(superToken, 1)` from the streaming app to `receiver` so the flow rate of this stream becomes `newFlowRate`
+     * @param superToken Address of super token to stream
+     * @param receiver Receiver of the stream
+     * @param newFlowRate New flow rate of the stream
+     */
     function updateStream(
         ISuperToken superToken,
         address receiver,
@@ -124,6 +144,10 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         emit StreamUpdate(superToken, receiver, newFlowRate);
     }
 
+    /**
+     * @notice Whitelist super token at `superToken` so now it can be deposited for streaming and streams of this token can be created.
+     * @param superToken Address of super token to whitelist
+     */
     function whitelistSuperToken(ISuperToken superToken)
         external
         authP(WHITELIST_SUPER_TOKEN_ROLE, arr(uint256(superToken)))
