@@ -14,12 +14,31 @@ const deployFramework = require("@superfluid-finance/ethereum-contracts/scripts/
 const deployTestToken = require("@superfluid-finance/ethereum-contracts/scripts/deploy-test-token");
 const deploySuperToken = require("@superfluid-finance/ethereum-contracts/scripts/deploy-super-token");
 const SuperfluidSDK = require("@superfluid-finance/js-sdk");
+const { hash } = require('eth-ens-namehash')
 const { networks } = require("../buidler.config");
 
 const tokens = ['WETH', "DAI"]
+
 const errorHandler = err => {
   if (err) throw err;
 };
+
+const newApp = async (dao, appName, baseAppAddress, rootAccount) => {
+  const receipt = await dao.newAppInstance(
+    hash(`${appName}.aragonpm.test`), // appId - Unique identifier for each app installed in the DAO; can be any bytes32 string in the tests.
+    baseAppAddress, // appBase - Location of the app's base implementation.
+    '0x', // initializePayload - Used to instantiate and initialize the proxy in the same call (if given a non-empty bytes string).
+    false, // setDefault - Whether the app proxy is the default proxy.
+    { from: rootAccount }
+  )
+
+  // Find the deployed proxy address in the tx logs.
+  const logs = receipt.logs
+  const log = logs.find((l) => l.event === 'NewAppProxy')
+  const proxyAddress = log.args.proxy
+
+  return proxyAddress
+}
 
 // ganache addresses
 let appManager
@@ -48,7 +67,7 @@ module.exports = {
     acl = await artifacts.require("ACL").at(await dao.acl());
 
     await _getAccounts(web3)
-    await _deployVault()
+    await _deployVault(dao)
     await _deploySuperfluidFramework(web3)
     await _deployTokens(web3)
     await _initializeSuperfluidFramework(web3)
@@ -89,10 +108,12 @@ async function _getAccounts(web3) {
   ([appManager, superfluidDeployer, alice, bob] = await web3.eth.getAccounts())
 }
 
-async function _deployVault() {
-  const VaultMock = artifacts.require('VaultMock')
-
-  vault = await VaultMock.new({ from: appManager })
+async function _deployVault(dao) {
+  const Vault = artifacts.require('Vault.sol')
+  const vaultBase = await Vault.new()
+  const proxyAddressVault = await newApp(dao, 'vault', vaultBase.address, appManager)
+  vault = await Vault.at(proxyAddressVault)
+  vault.initialize()
   console.log(`> Vault deployed: ${vault.address}`)
 }
 
@@ -202,14 +223,17 @@ async function _printStreams(web3) {
     const details = (await superfluid.user({
       address: alice,
       token: _getSuperTokenAddress(token)
-    }).details()).cfa
-    console.log("Alice's streams")
+    }).details())
+    console.log()
+    console.log("Streaming app streams")
     console.log(token)
-    console.log(details)
+    console.log("netFlow")
+    console.log(details.cfa.netFlow)
+    console.log("inFlows")
+    console.log(details.cfa.flows.inFlows)
     console.log("outFlows")
-    console.log(details.flows.outFlows)
+    console.log(details.cfa.flows.outFlows)
   }
-
 }
 
 function _tokenToSuper(token) {

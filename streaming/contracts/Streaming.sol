@@ -25,6 +25,8 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     string private constant ERROR_VAULT_NOT_CONTRACT = "VAULT_NOT_CONTRACT";
     string private constant ERROR_TOKEN_APPROVE_FAILED =
         "STREAMING_TOKEN_APPROVE_FAILED";
+    string private constant ERROR_SUPER_TOKEN_NOT_WHITELISTED =
+        "SUPER_TOKEN_NOT_WHITELISTED";
 
     Vault public vault;
     ISuperfluid host;
@@ -66,13 +68,16 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         // get the underlying token address from the SuperToken contract
         address underlyingToken = superToken.getUnderlyingToken();
         // transfer tokens from vault to the streaming app smart contract
-        // we have to ensure that the streaming app has the role to call vault.transfer
+        // we have to ensure that the streaming app has the role needed to call vault.transfer
+
         vault.transfer(underlyingToken, address(this), amount);
+
         // call approve for these tokens for the super token contract
         require(
             ERC20(underlyingToken).safeApprove(superToken, amount),
             ERROR_TOKEN_APPROVE_FAILED
         );
+
         // call upgrade of the super token contract
         superToken.upgrade(amount);
 
@@ -115,6 +120,7 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     {
         // we need some whitelist for superTokens. Passing here an arbitrary address could be very bad.
         _updateOutflow(superToken, receiver, newFlowRate);
+
         emit StreamUpdate(superToken, receiver, newFlowRate);
     }
 
@@ -192,7 +198,10 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
 
     // is superToken whitelisted modifier. We cannot allow to pass arbitrary addresses to our external functions
     modifier isWhitelisted(ISuperToken superToken) {
-        require(superTokenWhitelist[superToken]);
+        require(
+            superTokenWhitelist[superToken],
+            ERROR_SUPER_TOKEN_NOT_WHITELISTED
+        );
         _;
     }
 }
