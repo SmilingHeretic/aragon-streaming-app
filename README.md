@@ -1,3 +1,6 @@
+Buffer
+======
+
 ![Aragon-Superfluid logos](assets/Aragon-Superfluid304x117.png)
 # Aragon Streaming App
 
@@ -29,6 +32,8 @@ The `dao install` command will create an instance of the app and assign permissi
 For more information see the [Aragon CLI docs](https://hack.aragon.org/docs/cli-dao-commands#dao-install).
 
 ## Design Sketches
+
+We first made a [design in Figma](https://www.figma.com/file/PBHpbJMYFHCrUeRCWrEHQo/Aragon-DAO-%2B-Super-app?node-id=8%3A2) to be visually consistent and think things thru. 
 
 ### Streaming App Overview
 ![Streaming App Overview](assets/FigmaAppOverview.png)
