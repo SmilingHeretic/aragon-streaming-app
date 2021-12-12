@@ -66,7 +66,7 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         // get the underlying token address from the SuperToken contract
         address underlyingToken = superToken.getUnderlyingToken();
         // transfer tokens from vault to the streaming app smart contract
-        // we have to ensure that the streaming app has the role to call vault.transfer
+        // we have to ensure that the streaming app has the role needed to call vault.transfer
         vault.transfer(underlyingToken, address(this), amount);
         // call approve for these tokens for the super token contract
         require(
@@ -115,6 +115,7 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     {
         // we need some whitelist for superTokens. Passing here an arbitrary address could be very bad.
         _updateOutflow(superToken, receiver, newFlowRate);
+
         emit StreamUpdate(superToken, receiver, newFlowRate);
     }
 
