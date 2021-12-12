@@ -45,6 +45,7 @@ const App = React.memo( () => {
       >
         {mode === MODE.DEPOSIT_TOKENS ? (
           <DepositTokens
+            onDeposit={actions.deposit}
             panelVisible={panelState.visible}
             panelOpened={panelState.opened}
           />

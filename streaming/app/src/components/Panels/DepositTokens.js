@@ -8,10 +8,11 @@ const NO_ERROR = Symbol('NO_ERROR')
 const TOKEN_ADDRESS_NOT_VALID = Symbol('TOKEN_ADDRESS_NOT_VALID')
 const initialState = { value: '', error: NO_ERROR }
 
-const DepositTokens = React.memo(({ currencies, on, panelVisible, panelOpened }) => {
-  currencies = ['DAI', 'ETH']
+const DepositTokens = React.memo(({ onDeposit, panelVisible, panelOpened }) => {
+  const currencies = ['DAI', 'ETH']
   const [address, setAddress, setError] = useAddress(panelVisible)
   const [selected, setSelected] = useState(0)
+  console.log(onDeposit)
 
   const inputRef = useRef(null)
   // Panel opens =>  Focus input
@@ -29,7 +30,8 @@ const DepositTokens = React.memo(({ currencies, on, panelVisible, panelOpened })
       setError(error)
       return }
 
-    useDepositTokens(selected, address.value);
+
+    onDeposit(selected, address.value);
   }
 
   let errorMessage
