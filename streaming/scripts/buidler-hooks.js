@@ -71,6 +71,7 @@ module.exports = {
     await _upgradeTokens(web3)
     await _openStreams(web3)
     await _printTokenBalances(web3)
+    await _printStreams(web3)
   },
 
   // Called when the start task needs to know the app proxy's init parameters.
@@ -196,8 +197,18 @@ async function _printTokenBalances(web3) {
   }
 }
 
-
 async function _printStreams(web3) {
+  for (const token of tokens) {
+    const details = (await superfluid.user({
+      address: alice,
+      token: _getSuperTokenAddress(token)
+    }).details()).cfa
+    console.log("Alice's streams")
+    console.log(token)
+    console.log(details)
+    console.log("outFlows")
+    console.log(details.flows.outFlows)
+  }
 
 }
 
