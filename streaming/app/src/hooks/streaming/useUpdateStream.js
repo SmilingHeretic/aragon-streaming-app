@@ -5,8 +5,8 @@ export function useUpdateStream(onDone) {
   const api = useApi()
 
   return useCallback(
-    amount => {
-      api.updateStream(amount).toPromise()
+    (superToken, amount) => {
+      api.updateStream(superToken, amount).toPromise()
       onDone()
     },
     [api, onDone]

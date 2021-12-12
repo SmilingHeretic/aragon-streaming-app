@@ -5,8 +5,8 @@ export function useDepositTokens(onDone) {
   const api = useApi()
 
   return useCallback(
-    amount => {
-      api.depositTokens(amount).toPromise()
+    (superToken, amount) => {
+      api.deposit(superToken, amount).toPromise()
       onDone()
     },
     [api, onDone]

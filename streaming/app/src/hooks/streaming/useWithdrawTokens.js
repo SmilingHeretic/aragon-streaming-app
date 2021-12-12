@@ -5,8 +5,8 @@ export function useWithdrawTokens(onDone) {
   const api = useApi()
 
   return useCallback(
-    amount => {
-      api.withdrawTokens(amount).toPromise()
+    (superToken, amount) => {
+      api.withdraw(superToken, amount).toPromise()
       onDone()
     },
     [api, onDone]

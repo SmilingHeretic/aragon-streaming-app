@@ -20,8 +20,8 @@ export function useAppLogic() {
 
   const actions = {
     manageTokens: useManageTokens(panelState.requestClose),
-    depositTokens: useDepositTokens(panelState.requestClose),
-    withdrawTokens: useWithdrawTokens(panelState.requestClose),
+    deposit: useDepositTokens(panelState.requestClose),
+    withdraw: useWithdrawTokens(panelState.requestClose),
     createStream: useCreateStream(panelState.requestClose),
     receiveStream: useReceiveStream(panelState.requestClose),
     updateStream: useUpdateStream(panelState.requestClose),
