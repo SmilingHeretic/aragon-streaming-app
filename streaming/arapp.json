@@ -2,12 +2,22 @@
   "roles": [
     {
       "name": "Deposit tokens for streaming",
-      "id": "DEPOSIT_FOR_STREAMING_ROLE",
+      "id": "DEPOSIT_ROLE",
       "params": []
     },
     {
-      "name": "Update streams from the vault",
-      "id": "UPDATE_STREAMS_ROLE",
+      "name": "Withdraw tokens for streaming back to the vault",
+      "id": "WITHDRAW_ROLE",
+      "params": []
+    },
+    {
+      "name": "Update money streams",
+      "id": "UPDATE_STREAM_ROLE",
+      "params": []
+    },
+    {
+      "name": "Whitelist addresses of super tokens",
+      "id": "WHITELIST_SUPER_TOKEN_ROLE",
       "params": []
     }
   ],

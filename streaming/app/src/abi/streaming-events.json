@@ -1,0 +1,59 @@
+[
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "superToken",
+        "type": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "deposit",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "superToken",
+        "type": "address"
+      },
+      {
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "name": "newFlowRate",
+        "type": "int96"
+      }
+    ],
+    "name": "updateStream",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "superToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Withdrawal",
+    "type": "event"
+  }
+]
