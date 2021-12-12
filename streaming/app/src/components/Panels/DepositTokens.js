@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Field, TextInput, Button, DropDown } from '@aragon/ui'
 import { ErrorMessage, InfoMessage } from "../Message";
+import { isAddress } from 'web3-utils'
+import { useDepositTokens } from "../../hooks/streaming/useDepositTokens";
 
 const NO_ERROR = Symbol('NO_ERROR')
 const TOKEN_ADDRESS_NOT_VALID = Symbol('TOKEN_ADDRESS_NOT_VALID')
 const initialState = { value: '', error: NO_ERROR }
 
-const DepositTokens = React.memo(({ currencies, onManageToken, panelVisible, panelOpened }) => {
+const DepositTokens = React.memo(({ currencies, on, panelVisible, panelOpened }) => {
   currencies = ['DAI', 'ETH']
   const [address, setAddress, setError] = useAddress(panelVisible)
   const [selected, setSelected] = useState(0)
@@ -22,13 +24,12 @@ const DepositTokens = React.memo(({ currencies, onManageToken, panelVisible, pan
   const handleFormSubmit = event => {
     event.preventDefault()
 
-    const error = validate(address.value, tokens)
+    const error = validate(address.value)
     if (error) {
       setError(error)
-      return
-    }
+      return }
 
-    onManageToken(address.value)
+    useDepositTokens(selected, address.value);
   }
 
   let errorMessage
@@ -92,9 +93,8 @@ const useAddress = panelVisible => {
   return [address, handleAddressChange, handleAddressError]
 }
 
-const validate = (address, tokens) => {
+const validate = (address) => {
   if (!isAddress(address)) return TOKEN_ADDRESS_NOT_VALID
-
   return null
 }
 
