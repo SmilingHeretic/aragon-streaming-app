@@ -1,12 +1,16 @@
 ![Aragon-Superfluid logos](assets/Aragon-Superfluid304x117.png)
 # Aragon Streaming App
 
-As streaming money becomes the new normal DAOs will naturally lead the way. If the Aragon client handles Superfluid streaming payments then many DAOs can inherit the primitive. 
+As streaming money becomes the new normal DAOs will naturally lead the way. If the [Aragon](https://aragon.org/) client handles [Superfluid](https://superfluid.finance/) streaming payments then many DAOs can inherit the primitive.
 
-In our integration we followed the design philosophy of Aragon:
+We integrated Superfluid payment streams following the design philosophy of Aragon:
 > "...architect apps to do one thing and one thing well and to respect and implement the few aragonOS interfaces"
 
-Our team implemented an app, named *Streaming*, that includes functions to upgrade/downgrade tokens to Super Tokens and manage payment streams. Once installed a DAO will be able to send money over time to its members and other entities. 
+Our team[^0] implemented an app, named *Streaming*, that includes functions to upgrade/downgrade tokens to Super Tokens and then manage payment streams. Once installed a DAO will be able to stream money, over time, to its members and other entities.
+
+## Demo Video
+
+View the [Aragon Streaming App demo](https://youtu.be/#) on YouTube.
 
 ## Installation
 
@@ -24,6 +28,13 @@ The `dao install` command will create an instance of the app and assign permissi
 
 For more information see the [Aragon CLI docs](https://hack.aragon.org/docs/cli-dao-commands#dao-install).
 
-<!-- Credits? 
-[^0]: Collaborated by @SmilingHeretic, @eurvin, @poissonpoivre, @kitblake with help from Superfluid astronauts.
--->
+## Design Sketches
+
+### Streaming App Overview
+![Streaming App Overview](assets/FigmaAppOverview.png)
+
+### Transact Sidebars
+![Sliding Sidebars](assets/FigmaSidebars.png)
+
+[^0]: Collaborated by @SmilingHeretic, @eurvin, @poissonpoivre, @kitblake with support from Superfluid astronauts.
+<!-- Credits? -->
