@@ -32,7 +32,7 @@ let streaming
 let superfluid
 let tokenToContract = {}
 
-const INITIAL_TOKEN_AMOUNT = "2"
+const INITIAL_TOKENS_AMOUNT = "2"
 const INITIAL_SUPER_TOKENS_AMOUNT = "1.5"
 
 module.exports = {
@@ -67,11 +67,9 @@ module.exports = {
     { web3, artifacts }
   ) => {
     streaming = proxy
-    // await _upgradeTokens(web3)
-    // await _whitelistSuperTokens(web3)
-    // await _openStreams(web3)
     await _mintTokens(web3)
     await _upgradeTokens(web3)
+    await _openStreams(web3)
     await _printTokenBalances(web3)
   },
 
@@ -140,14 +138,13 @@ async function _getTokenContracts(web3) {
 async function _mintTokens(web3) {
   for (const address of [vault.address, alice]) {
     for (const token of tokens) {
-      await tokenToContract[token].mint(address, web3.utils.toWei(INITIAL_TOKEN_AMOUNT), { from: appManager })
+      await tokenToContract[token].mint(address, web3.utils.toWei(INITIAL_TOKENS_AMOUNT), { from: appManager })
     }
   }
 }
 
 async function _whitelistSuperTokens(web3) {
   const WHITELIST_SUPER_TOKEN_ROLE = await streaming.WHITELIST_SUPER_TOKEN_ROLE()
-  console.log(WHITELIST_SUPER_TOKEN_ROLE)
   await acl.createPermission(
     alice,
     streaming.address,
@@ -162,11 +159,24 @@ async function _whitelistSuperTokens(web3) {
 
 async function _upgradeTokens(web3) {
   for (const token of tokens) {
-    await tokenToContract[token].approve(_getSuperTokenAddress(token), web3.utils.toWei(INITIAL_SUPER_TOKENS_AMOUNT), { from: alice })
-    await tokenToContract[_tokenToSuper(token)].upgrade(web3.utils.toWei(INITIAL_SUPER_TOKENS_AMOUNT), { from: alice })
-    await tokenToContract[_tokenToSuper(token)].transferAll(streaming.address, { from: alice })
+    await tokenToContract[token].approve(_getSuperTokenAddress(token), web3.utils.toWei(INITIAL_TOKENS_AMOUNT), { from: alice })
+    await tokenToContract[_tokenToSuper(token)].upgrade(web3.utils.toWei(INITIAL_TOKENS_AMOUNT), { from: alice })
+    await tokenToContract[_tokenToSuper(token)].transfer(streaming.address, web3.utils.toWei(INITIAL_SUPER_TOKENS_AMOUNT), { from: alice })
   }
 }
+
+async function _openStreams(web3) {
+  await superfluid.user({
+    address: alice,
+    token: _getSuperTokenAddress("WETH")
+  }).flow({ flowRate: "10000000000000", recipient: streaming.address });
+
+  await superfluid.user({
+    address: alice,
+    token: _getSuperTokenAddress("DAI")
+  }).flow({ flowRate: "20000000000000", recipient: streaming.address });
+}
+
 
 async function _printTokenBalances(web3) {
   console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
