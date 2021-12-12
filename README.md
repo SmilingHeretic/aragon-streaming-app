@@ -15,21 +15,13 @@ Our team[^0] implemented an app, named *Streaming*, that includes functions to u
 
 View the [Aragon Streaming App demo](https://youtu.be/#) on YouTube.
 
-## Installation
-
-Use the `dao install` command to install an instance of an app in the DAO.
+## How to run locally
 
 ```sh
-dao install <dao-addr> <app-apm-repo> [repo-version]
+cd streaming
+npm install
+npm start
 ```
-
-- `dao-addr`: The main address of the DAO (Kernel).
-- `app-apm-repo`: The repo name of the app being installed (e.g. `voting` or `voting.aragonpm.eth`).
-- `repo-version`: (optional) Version of the repo that will be installed; can be a version number or `latest` for the newest published version. Defaults to `latest`.
-
-The `dao install` command will create an instance of the app and assign permissions to the main account to perform all the protected actions in the app.
-
-For more information see the [Aragon CLI docs](https://hack.aragon.org/docs/cli-dao-commands#dao-install).
 
 ## Design Sketches
 
