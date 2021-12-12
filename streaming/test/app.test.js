@@ -1,6 +1,7 @@
 const { assert } = require('chai')
 const { assertRevert } = require('@aragon/contract-test-helpers/assertThrow')
 const { newDao, newApp } = require('./helpers/dao')
+
 const { setOpenPermission } = require('./helpers/permissions')
 
 const deployFramework = require("@superfluid-finance/ethereum-contracts/scripts/deploy-framework");
@@ -9,18 +10,33 @@ const deploySuperToken = require("@superfluid-finance/ethereum-contracts/scripts
 const SuperfluidSDK = require("@superfluid-finance/js-sdk");
 
 const Streaming = artifacts.require('Streaming.sol')
-const VaultMock = artifacts.require('VaultMock.sol')
+const Vault = artifacts.require('Vault.sol')
 
 const tokens = ['WETH', "DAI"]
 const errorHandler = err => {
   if (err) throw err;
 };
 
+const newApp = async (dao, appName, baseAppAddress, rootAccount) => {
+  const receipt = await dao.newAppInstance(
+    hash(`${appName}.aragonpm.test`), // appId - Unique identifier for each app installed in the DAO; can be any bytes32 string in the tests.
+    baseAppAddress, // appBase - Location of the app's base implementation.
+    '0x', // initializePayload - Used to instantiate and initialize the proxy in the same call (if given a non-empty bytes string).
+    false, // setDefault - Whether the app proxy is the default proxy.
+    { from: rootAccount }
+  )
+
+  // Find the deployed proxy address in the tx logs.
+  const logs = receipt.logs
+  const log = logs.find((l) => l.event === 'NewAppProxy')
+  const proxyAddress = log.args.proxy
+
+  return proxyAddress
+}
 
 
 
 contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
-  let appBase
   let vault
   let streaming
   let superfluid
@@ -35,7 +51,8 @@ contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
     const { dao, acl } = await newDao(appManager)
 
     // Deploy the app's base contract.
-    const appBase = await Streaming.new()
+    const streamingBase = await Streaming.new()
+    const vaultBase = await Vault.new()
 
     // deploy Superfluid framework
     await deployFramework(errorHandler, {
@@ -72,8 +89,28 @@ contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
     }
 
 
-    // deploy vault
-    vault = await VaultMock.new({ from: appManager })
+    // instatinate vault
+    const proxyAddressVault = await newApp(dao, 'vault', vaultBase.address, appManager)
+    vault = await Vault.at(proxyAddressVault)
+
+    // instatinate the streaming app
+    const proxyAddressStreaming = await newApp(dao, 'Streaming', streamingBase.address, appManager)
+    streaming = await Streaming.at(proxyAddressStreaming)
+
+    // Set up the permissions.
+    await acl.createPermission(streaming.address, vault.address, await vault.TRANSFER_ROLE(), appManager, { from: appManager })
+    await setOpenPermission(acl, streaming.address, await streaming.DEPOSIT_ROLE(), appManager)
+    await setOpenPermission(acl, streaming.address, await streaming.WITHDRAW_ROLE(), appManager)
+    await setOpenPermission(acl, streaming.address, await streaming.WHITELIST_SUPER_TOKEN_ROLE(), appManager)
+    await setOpenPermission(acl, streaming.address, await streaming.UPDATE_STREAM_ROLE(), appManager)
+
+    // initialize vault
+    vault.initialize()
+
+    // initialize the streaming app
+    const superTokenAddresses = tokens.map(token => _getSuperTokenAddress(token))
+    await streaming.initialize(vault.address, superfluid.host.address, superfluid.agreements.cfa.address, superTokenAddresses)
+
 
     // mint tokens
     for (const address of [vault.address]) {
@@ -82,55 +119,42 @@ contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
       }
     }
 
-    // instatinate the streaming app
-    const proxyAddress = await newApp(dao, 'Streaming', appBase.address, appManager)
-    streaming = await Streaming.at(proxyAddress)
+    // print the state
+    await _printTokenBalances(web3)
+    await _printStreams(web3)
+  })
 
-    // Set up the permissions.
-    // await setOpenPermission(acl, vault.address, await vault.TRANSFER_ROLE(), appManager)
-    await setOpenPermission(acl, streaming.address, await streaming.DEPOSIT_ROLE(), appManager)
-    await setOpenPermission(acl, streaming.address, await streaming.WITHDRAW_ROLE(), appManager)
-    await setOpenPermission(acl, streaming.address, await streaming.WHITELIST_SUPER_TOKEN_ROLE(), appManager)
-    await setOpenPermission(acl, streaming.address, await streaming.UPDATE_STREAM_ROLE(), appManager)
+  it('Deposit', async () => {
+    // console.log("Underlying token")
+    // console.log(await tokenToContract["WETHx"].getUnderlyingToken())
+    // console.log(tokenToContract["WETH"].address)
 
-    // initialize the streaming app
-    const superTokenAddresses = tokens.map(token => _getSuperTokenAddress(token))
-    await streaming.initialize(vault.address, superfluid.host.address, superfluid.agreements.cfa.address, superTokenAddresses)
+    // await vault.transfer(tokenToContract["WETH"].address, streaming.address, web3.utils.toWei("0.5"))
+    await streaming.deposit(_getSuperTokenAddress("WETH"), web3.utils.toWei("0.5"), { from: appManager })
+    await streaming.deposit(_getSuperTokenAddress("DAI"), web3.utils.toWei("1.5"), { from: appManager })
+
+    // print the state
+    await _printTokenBalances(web3)
+    await _printStreams(web3)
+
+
+  })
+
+  xit('Withdraw', async () => {
+    await streaming.deposit(_getSuperTokenAddress("WETH"), web3.utils.toWei("0.5"), { from: appManager })
+    await streaming.deposit(_getSuperTokenAddress("DAI"), web3.utils.toWei("1.5"), { from: appManager })
 
     // print the state
     await _printTokenBalances(web3)
     await _printStreams(web3)
 
   })
-  /*
-    beforeEach('deploy dao and app', async () => {
-      const { dao, acl } = await newDao(appManager)
-  
-      // Instantiate a proxy for the app, using the base contract as its logic implementation.
-      const proxyAddress = await newApp(dao, 'streaming', appBase.address, appManager)
-      app = await CounterApp.at(proxyAddress)
-  
-      // Set up the app's permissions.
-      await setOpenPermission(acl, app.address, await app.INCREMENT_ROLE(), appManager)
-      await setOpenPermission(acl, app.address, await app.DECREMENT_ROLE(), appManager)
-  
-      // Initialize the app's proxy.
-      await app.initialize(INIT_VALUE)
-    })
-  */
-  it('something', async () => {
+
+  xit('Update stream', async () => {
 
   })
 
-  xit('something', async () => {
-
-  })
-
-  xit('something', async () => {
-
-  })
-
-  xit('something', async () => {
+  xit('Whitelist SuperToken', async () => {
 
   })
 

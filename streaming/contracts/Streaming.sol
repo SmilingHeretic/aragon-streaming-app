@@ -67,12 +67,15 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         address underlyingToken = superToken.getUnderlyingToken();
         // transfer tokens from vault to the streaming app smart contract
         // we have to ensure that the streaming app has the role needed to call vault.transfer
+
         vault.transfer(underlyingToken, address(this), amount);
+
         // call approve for these tokens for the super token contract
         require(
             ERC20(underlyingToken).safeApprove(superToken, amount),
             ERROR_TOKEN_APPROVE_FAILED
         );
+
         // call upgrade of the super token contract
         superToken.upgrade(amount);
 
