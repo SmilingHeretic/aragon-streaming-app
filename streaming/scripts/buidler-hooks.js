@@ -16,7 +16,7 @@ const deploySuperToken = require("@superfluid-finance/ethereum-contracts/scripts
 const SuperfluidSDK = require("@superfluid-finance/js-sdk");
 const { networks } = require("../buidler.config");
 
-const tokens = ['ETH', "DAI"]
+const tokens = ['WETH', "DAI"]
 const errorHandler = err => {
   if (err) throw err;
 };
@@ -26,9 +26,14 @@ let appManager
 let superfluidDeployer
 let alice, bob
 
+let acl
 let vault
+let streaming
 let superfluid
 let tokenToContract = {}
+
+const INITIAL_TOKEN_AMOUNT = "2"
+const INITIAL_SUPER_TOKENS_AMOUNT = "1.5"
 
 module.exports = {
   // Called before a dao is deployed.
@@ -39,13 +44,15 @@ module.exports = {
     { dao, _experimentalAppInstaller, log },
     { web3, artifacts }
   ) => {
+    // Get ACL
+    acl = await artifacts.require("ACL").at(await dao.acl());
+
     await _getAccounts(web3)
     await _deployVault()
     await _deploySuperfluidFramework(web3)
     await _deployTokens(web3)
     await _initializeSuperfluidFramework(web3)
-    await _getTokenAddresses(web3)
-    console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
+    await _getTokenContracts(web3)
   },
 
   // Called after the app's proxy is created, but before it's initialized.
@@ -58,12 +65,21 @@ module.exports = {
   postInit: async (
     { proxy, _experimentalAppInstaller, log },
     { web3, artifacts }
-  ) => { },
+  ) => {
+    streaming = proxy
+    // await _upgradeTokens(web3)
+    // await _whitelistSuperTokens(web3)
+    // await _openStreams(web3)
+    await _mintTokens(web3)
+    await _upgradeTokens(web3)
+    await _printTokenBalances(web3)
+  },
 
   // Called when the start task needs to know the app proxy's init parameters.
   // Must return an array with the proxy's init parameters.
   getInitParams: async ({ log }, { web3, artifacts }) => {
-    return [vault.address, superfluid.host.address, superfluid.agreements.cfa.address]
+    const superTokenAddresses = tokens.map(token => _getSuperTokenAddress(token))
+    return [vault.address, superfluid.host.address, superfluid.agreements.cfa.address, superTokenAddresses]
   },
 
   // Called after the app's proxy is updated with a new implementation.
@@ -113,14 +129,72 @@ async function _deployTokens(web3) {
   console.log("> Tokens deployed")
 }
 
-async function _getTokenAddresses(web3) {
-  tokens.forEach(async token => {
-    const superToken = `${token}x`
+async function _getTokenContracts(web3) {
+  for (const token of tokens) {
+    const superToken = _tokenToSuper(token)
     tokenToContract[superToken] = superfluid.tokens[superToken];
     tokenToContract[token] = await superfluid.contracts.TestToken.at(await superfluid.tokens[token].address);
-  })
+  }
 }
 
-async function _printState(web3) {
+async function _mintTokens(web3) {
+  for (const address of [vault.address, alice]) {
+    for (const token of tokens) {
+      await tokenToContract[token].mint(address, web3.utils.toWei(INITIAL_TOKEN_AMOUNT), { from: appManager })
+    }
+  }
+}
 
+async function _whitelistSuperTokens(web3) {
+  const WHITELIST_SUPER_TOKEN_ROLE = await streaming.WHITELIST_SUPER_TOKEN_ROLE()
+  console.log(WHITELIST_SUPER_TOKEN_ROLE)
+  await acl.createPermission(
+    alice,
+    streaming.address,
+    WHITELIST_SUPER_TOKEN_ROLE,
+    appManager,
+    { from: appManager }
+  );
+  for (const token of tokens) {
+    await streaming.whitelistSuperToken(_getSuperTokenAddress(token), { from: alice })
+  }
+}
+
+async function _upgradeTokens(web3) {
+  for (const token of tokens) {
+    await tokenToContract[token].approve(_getSuperTokenAddress(token), web3.utils.toWei(INITIAL_SUPER_TOKENS_AMOUNT), { from: alice })
+    await tokenToContract[_tokenToSuper(token)].upgrade(web3.utils.toWei(INITIAL_SUPER_TOKENS_AMOUNT), { from: alice })
+    await tokenToContract[_tokenToSuper(token)].transferAll(streaming.address, { from: alice })
+  }
+}
+
+async function _printTokenBalances(web3) {
+  console.log(`> Block number: ${await web3.eth.getBlockNumber()}`)
+
+  const users = [
+    { name: 'streaming', address: streaming.address },
+    { name: 'vault', address: vault.address },
+    { name: 'alice', address: alice }
+  ]
+
+  for (const user of users) {
+    console.log(`Name: ${user.name}, address: ${user.address}`)
+    for (const token of tokens) {
+      console.log(`Token: ${token}, balance: ${await tokenToContract[token].balanceOf(user.address)}`)
+      console.log(`Token: ${_tokenToSuper(token)}, balance: ${await tokenToContract[_tokenToSuper(token)].balanceOf(user.address)}`)
+    }
+  }
+}
+
+
+async function _printStreams(web3) {
+
+}
+
+function _tokenToSuper(token) {
+  return `${token}x`
+}
+
+function _getSuperTokenAddress(token) {
+  return tokenToContract[_tokenToSuper(token)].address
 }

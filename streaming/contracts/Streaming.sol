@@ -34,7 +34,8 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     function initialize(
         Vault _vault,
         ISuperfluid _host,
-        IConstantFlowAgreementV1 _cfa
+        IConstantFlowAgreementV1 _cfa,
+        ISuperToken[] _superTokenWhitelist
     ) external onlyInit {
         initialized();
 
@@ -42,6 +43,9 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
         vault = _vault;
         host = _host;
         cfa = _cfa;
+        for (uint256 i; i < _superTokenWhitelist.length; i++) {
+            superTokenWhitelist[_superTokenWhitelist[i]] = true;
+        }
     }
 
     // function for token -> superToken conversion
