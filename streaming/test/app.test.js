@@ -17,25 +17,6 @@ const errorHandler = err => {
   if (err) throw err;
 };
 
-const newApp = async (dao, appName, baseAppAddress, rootAccount) => {
-  const receipt = await dao.newAppInstance(
-    hash(`${appName}.aragonpm.test`), // appId - Unique identifier for each app installed in the DAO; can be any bytes32 string in the tests.
-    baseAppAddress, // appBase - Location of the app's base implementation.
-    '0x', // initializePayload - Used to instantiate and initialize the proxy in the same call (if given a non-empty bytes string).
-    false, // setDefault - Whether the app proxy is the default proxy.
-    { from: rootAccount }
-  )
-
-  // Find the deployed proxy address in the tx logs.
-  const logs = receipt.logs
-  const log = logs.find((l) => l.event === 'NewAppProxy')
-  const proxyAddress = log.args.proxy
-
-  return proxyAddress
-}
-
-
-
 contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
   let vault
   let streaming
@@ -124,38 +105,58 @@ contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
     await _printStreams(web3)
   })
 
-  it('Deposit', async () => {
-    // console.log("Underlying token")
-    // console.log(await tokenToContract["WETHx"].getUnderlyingToken())
-    // console.log(tokenToContract["WETH"].address)
-
-    // await vault.transfer(tokenToContract["WETH"].address, streaming.address, web3.utils.toWei("0.5"))
+  xit('Deposit', async () => {
     await streaming.deposit(_getSuperTokenAddress("WETH"), web3.utils.toWei("0.5"), { from: appManager })
     await streaming.deposit(_getSuperTokenAddress("DAI"), web3.utils.toWei("1.5"), { from: appManager })
 
     // print the state
     await _printTokenBalances(web3)
     await _printStreams(web3)
-
-
   })
 
   xit('Withdraw', async () => {
     await streaming.deposit(_getSuperTokenAddress("WETH"), web3.utils.toWei("0.5"), { from: appManager })
     await streaming.deposit(_getSuperTokenAddress("DAI"), web3.utils.toWei("1.5"), { from: appManager })
 
+    await streaming.withdraw(_getSuperTokenAddress("WETH"), web3.utils.toWei("0.2"), { from: appManager })
+    await streaming.withdraw(_getSuperTokenAddress("DAI"), web3.utils.toWei("0.7"), { from: appManager })
+
     // print the state
     await _printTokenBalances(web3)
     await _printStreams(web3)
 
   })
 
-  xit('Update stream', async () => {
+  it('Update stream', async () => {
+    await streaming.deposit(_getSuperTokenAddress("WETH"), web3.utils.toWei("0.5"), { from: appManager })
+    await streaming.deposit(_getSuperTokenAddress("DAI"), web3.utils.toWei("1.5"), { from: appManager })
+
+    await streaming.updateStream(_getSuperTokenAddress("WETH"), alice, "10000000000000")
+    await streaming.updateStream(_getSuperTokenAddress("DAI"), alice, "20000000000000")
+
+    await streaming.updateStream(_getSuperTokenAddress("WETH"), bob, "15000000000000")
+    await streaming.updateStream(_getSuperTokenAddress("DAI"), bob, "17000000000000")
+
+    // print the state
+    await _printTokenBalances(web3)
+    await _printStreams(web3)
+
+    await streaming.updateStream(_getSuperTokenAddress("WETH"), alice, "0")
+    await streaming.updateStream(_getSuperTokenAddress("DAI"), bob, "18000000000000")
+
+    // print the state
+    await _printTokenBalances(web3)
+    await _printStreams(web3)
 
   })
 
-  xit('Whitelist SuperToken', async () => {
+  xit('Attmept not whitelisted token', async () => {
+    await streaming.deposit(bob, web3.utils.toWei("0.5"), { from: appManager })
+  })
 
+  xit('Whitelist SuperToken', async () => {
+    await streaming.whitelistSuperToken(bob)
+    await streaming.deposit(bob, web3.utils.toWei("0.5"), { from: appManager })
   })
 
   async function _printTokenBalances(web3) {
@@ -204,6 +205,5 @@ contract('Streaming', ([appManager, superfluidDeployer, alice, bob]) => {
   function _getSuperTokenAddress(token) {
     return tokenToContract[_tokenToSuper(token)].address
   }
-
 
 })

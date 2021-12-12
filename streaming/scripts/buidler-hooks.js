@@ -223,14 +223,17 @@ async function _printStreams(web3) {
     const details = (await superfluid.user({
       address: alice,
       token: _getSuperTokenAddress(token)
-    }).details()).cfa
-    console.log("Alice's streams")
+    }).details())
+    console.log()
+    console.log("Streaming app streams")
     console.log(token)
-    console.log(details)
+    console.log("netFlow")
+    console.log(details.cfa.netFlow)
+    console.log("inFlows")
+    console.log(details.cfa.flows.inFlows)
     console.log("outFlows")
-    console.log(details.flows.outFlows)
+    console.log(details.cfa.flows.outFlows)
   }
-
 }
 
 function _tokenToSuper(token) {

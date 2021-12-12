@@ -25,6 +25,8 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
     string private constant ERROR_VAULT_NOT_CONTRACT = "VAULT_NOT_CONTRACT";
     string private constant ERROR_TOKEN_APPROVE_FAILED =
         "STREAMING_TOKEN_APPROVE_FAILED";
+    string private constant ERROR_SUPER_TOKEN_NOT_WHITELISTED =
+        "SUPER_TOKEN_NOT_WHITELISTED";
 
     Vault public vault;
     ISuperfluid host;
@@ -196,7 +198,10 @@ contract Streaming is EtherTokenConstant, IsContract, AragonApp {
 
     // is superToken whitelisted modifier. We cannot allow to pass arbitrary addresses to our external functions
     modifier isWhitelisted(ISuperToken superToken) {
-        require(superTokenWhitelist[superToken]);
+        require(
+            superTokenWhitelist[superToken],
+            ERROR_SUPER_TOKEN_NOT_WHITELISTED
+        );
         _;
     }
 }
