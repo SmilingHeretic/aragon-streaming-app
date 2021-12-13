@@ -16,12 +16,12 @@ In the last hours we ran into two showstopping problems:
 
 1. Supertokenaddresses: due to the sandboxed nature of Aragon we found it impossible to interact with the SF framework directly. Our contract also didn’t provide a method to get a list of supertokenaddresses to the front-end. We got around this by adding a manual address so you always deposit the same token, DAIx, but that was a stopgap workaround.
 
-2. However we get a message that we don’t have permission to perform the ‘deposit for streaming’ action. This is also a security measure by Aragon and we couldn't figure out how to set the permission correctly in the local blockchain (Buidler-hooks). It was also not possible to change them in the permissions menu.
+2. However we get a message that we don’t have permission to perform the ‘deposit for streaming’ action. This is also a security measure by Aragon and we couldn't figure out how to set the permission correctly in the local blockchain (Buidler-hooks). It was also not possible to change in the permissions menu.
 
 So there is no UI to see because you would not get beyond the error message about permissions. Probably these issues are solvable but we ran out of time.
 
-<!--## Demo Video
-View the [Aragon Streaming App demo](https://youtu.be/#) on YouTube.-->
+## Demo Video
+This [Aragon Streaming App demo](https://youtu.be/DraGMAAQu6g) is only an intro and explanation of our process.
 
 ## How to run locally
 
