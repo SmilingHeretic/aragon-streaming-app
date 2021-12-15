@@ -33,7 +33,7 @@ npm start
 
 ## Design Sketches
 
-We first made a [design in Figma](https://www.figma.com/file/PBHpbJMYFHCrUeRCWrEHQo/Aragon-DAO-%2B-Super-app?node-id=8%3A2) to be visually consistent with the Aragon UI, the preliminary mock up helped us thinking through the user journey.
+We first made a [design in Figma](https://www.figma.com/file/PBHpbJMYFHCrUeRCWrEHQo/Aragon-DAO-%2B-Super-app?node-id=8%3A2) to be visually consistent with the Aragon UI. The preliminary mock-up helped us think through the user journey.
 
 ### Streaming App Overview
 ![Streaming App Overview](assets/FigmaAppOverview.png)
